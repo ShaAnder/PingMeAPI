@@ -14,6 +14,10 @@ from pathlib import Path
 from decouple import config
 import dj_database_url
 from datetime import timedelta
+import os
+
+if os.path.exists('env.py'):
+    import env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,17 +27,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', cast=bool)
-ENVIRONMENT = config('ENVIRONMENT', default='production')
+DEBUG = 'DEV' in os.environ
 
-#run an additional guard for accidental prod changes
-if ENVIRONMENT == 'production' and DEBUG:
-    raise ValueError("DEBUG must be False in production!")
-
-ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.herokuapp.com',
+    os.environ.get('ALLOWED_HOSTS'),
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -46,16 +50,15 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(hours=24),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 }
-
-CLOUDINARY_STORAGE = {
-    'CLOUDINARY_URL': config('CLOUDINARY_URL')
-}
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Application definition
 INSTALLED_APPS = [
@@ -86,14 +89,22 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS setup for Ngrok/local frontend
 CORS_ALLOWED_ORIGINS = [
-    # React dev server
-    "http://localhost:3000",        
-    config("CORS_ALLOWED_DEV"),
+    origin for origin in [
+        os.environ.get('CLIENT_ORIGIN'),
+        os.environ.get('CLIENT_ORIGIN_DEV')
+    ] if origin
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CLOUDINARY_STORAGE = {
+    'cloud_name': os.environ.get('CLOUDINARY_CLOUD_NAME'),  
+    'api_key': os.environ.get('CLOUDINARY_API_KEY'),        
+    'api_secret': os.environ.get('CLOUDINARY_API_SECRET'),  
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 
 ROOT_URLCONF = 'pingme_api.urls'
 
@@ -118,7 +129,7 @@ WSGI_APPLICATION = 'pingme_api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-if ENVIRONMENT == 'development':
+if 'DEV' in os.environ:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -127,10 +138,9 @@ if ENVIRONMENT == 'development':
     }
 else:
     DATABASES = {
-        'default': dj_database_url.config(
-            default=config('DATABASE_URL')
-        )
+        'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
     }
+    
 
 
 # Password validation
