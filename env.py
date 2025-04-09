@@ -17,13 +17,13 @@ os.environ["DATABASE_URL"] = "postgresql://neondb_owner:y7LRT2ENqCfn@ep-bold-bus
 os.environ["HOST_EMAIL"] = "pingmepp5@gmail.com"
 os.environ["HOST_PW"] =  "lbnufsbomuyxzcqx"
 
-#cloudinary api 
+# cloudinary api 
 os.environ["CLOUDINARY_CLOUD_NAME"] = "dbldbdmuu"
 os.environ["CLOUDINARY_API_KEY"] = "281637296264875"
 os.environ["CLOUDINARY_API_SECRET"] = "o8KImcaPgCKsxHoRzJ7AxrotP4E"
 
 
-
+# os.environ["CLOUDINARY_URL"] = "cloudinary://281637296264875:o8KImcaPgCKsxHoRzJ7AxrotP4E@dbldbdmuu"
 
 
 
