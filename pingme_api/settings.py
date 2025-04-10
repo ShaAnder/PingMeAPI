@@ -107,6 +107,8 @@ CLOUDINARY_STORAGE = {
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
+DEFAULT_CHARSET = 'utf-8'
+
 ROOT_URLCONF = 'pingme_api.urls'
 
 TEMPLATES = [
