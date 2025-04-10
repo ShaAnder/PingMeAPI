@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'rest_framework',
     'corsheaders',
-
+    'channels',
     'profiles',
     'messenger',
     'relationships',
@@ -127,6 +127,17 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'pingme_api.wsgi.application'
+
+ASGI_APPLICATION = 'pingme_api.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],  # Default Redis server
+        },
+    },
+}
 
 
 # Database
